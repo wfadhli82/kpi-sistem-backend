@@ -1,29 +1,4 @@
-import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  TextField,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Grid,
-  Box,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from "@mui/material";
-import { Edit, Delete, Add } from "@mui/icons-material";
+import React, { useState } from "react";
 import { kpiService } from "./supabase";
 import { NumericFormat } from 'react-number-format';
 import EditIcon from '@mui/icons-material/Edit';

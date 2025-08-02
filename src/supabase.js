@@ -381,7 +381,7 @@ export const userService = {
       console.warn('⚠️ Supabase not configured, using localStorage fallback')
       const users = JSON.parse(localStorage.getItem('users') || '[]')
       const filtered = users.filter(user => user.id !== id)
-      localStorage.setItem('users', JSON.stringify(users))
+      localStorage.setItem('users', JSON.stringify(filtered))
       return true
     }
     

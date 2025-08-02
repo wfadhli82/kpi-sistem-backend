@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from "./AuthContext";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import AdminUtama from "./AdminUtama";
-import AdminBahagian from "./AdminBahagian";
 import UserInterface from "./UserInterface";
 import UserManagement from "./UserManagement";
 import MainLayout from "./MainLayout";
