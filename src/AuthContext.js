@@ -17,14 +17,15 @@ export const AuthProvider = ({ children }) => {
   const initializeDefaultUsers = async () => {
     try {
       const users = await userService.getAllUsers();
+      
       if (users.length === 0) {
         const defaultUsers = [
           {
-            name: 'Admin Utama',
-            email: 'wfadhli82@gmail.com',
-            password: 'admin123',
-            role: 'admin',
-            department_name: 'Pentadbiran'
+            name: process.env.REACT_APP_DEFAULT_ADMIN_NAME || 'Admin Utama',
+            email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'wfadhli82@gmail.com',
+            password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'admin123',
+            role: process.env.REACT_APP_DEFAULT_ADMIN_ROLE || 'admin',
+            department_name: process.env.REACT_APP_DEFAULT_ADMIN_DEPARTMENT || 'Pentadbiran'
           }
         ];
         
@@ -34,22 +35,25 @@ export const AuthProvider = ({ children }) => {
         console.log('✅ Default users initialized:', defaultUsers);
       } else {
         // Check if admin user exists, if not add it
-        const adminExists = users.some(user => user.email === 'wfadhli82@gmail.com' && user.role === 'admin');
+        const defaultEmail = process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'wfadhli82@gmail.com';
+        const adminExists = users.some(user => user.email === defaultEmail && user.role === 'admin');
         if (!adminExists) {
           const adminUser = {
-            name: 'Admin Utama',
-            email: 'wfadhli82@gmail.com',
-            password: 'admin123',
-            role: 'admin',
-            department_name: 'Pentadbiran'
+            name: process.env.REACT_APP_DEFAULT_ADMIN_NAME || 'Admin Utama',
+            email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'wfadhli82@gmail.com',
+            password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'admin123',
+            role: process.env.REACT_APP_DEFAULT_ADMIN_ROLE || 'admin',
+            department_name: process.env.REACT_APP_DEFAULT_ADMIN_DEPARTMENT || 'Pentadbiran'
           };
           await userService.createUser(adminUser);
           console.log('✅ Admin user added:', adminUser);
         } else {
           // Ensure admin user has password
-          const adminUser = users.find(user => user.email === 'wfadhli82@gmail.com' && user.role === 'admin');
+          const adminUser = users.find(user => user.email === defaultEmail && user.role === 'admin');
           if (adminUser && !adminUser.password) {
-            await userService.updateUser(adminUser.id, { password: 'admin123' });
+            await userService.updateUser(adminUser.id, { 
+              password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'admin123' 
+            });
             console.log('✅ Password added to existing admin user:', adminUser);
           }
         }

@@ -1,4 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid,
+  Box,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { Edit, Delete, Add } from "@mui/icons-material";
+import { kpiService } from "./supabase";
 import { NumericFormat } from 'react-number-format';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -63,6 +89,11 @@ function AdminUtama({ kpiList, setKpiList, handleDownloadExcel, handleExcelUploa
     return matchBahagian && matchKategori;
   });
 
+  console.log('🔍 kpiList length:', kpiList.length);
+  console.log('🔍 kpiList data:', kpiList);
+  console.log('🔍 filteredKpiList length:', filteredKpiList.length);
+  console.log('🔍 filteredKpiList data:', filteredKpiList);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({
@@ -123,8 +154,12 @@ function AdminUtama({ kpiList, setKpiList, handleDownloadExcel, handleExcelUploa
     setTahapSelected(idx);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
+    console.log('🔍 handleSave called!');
+    console.log('🔍 Form data:', form);
+    console.log('🔍 Edit index:', editIdx);
+    
     let dataToSave = { ...form };
     if (form.kategori === "Tahap Kemajuan") {
       dataToSave.tahapSelected = tahapSelected;
@@ -143,17 +178,116 @@ function AdminUtama({ kpiList, setKpiList, handleDownloadExcel, handleExcelUploa
       percentBelanja = percent.toFixed(2) + "%";
     }
     dataToSave.percentBelanja = percentBelanja;
-    if (editIdx !== null) {
-      setKpiList((prev) => prev.map((item, idx) => idx === editIdx ? dataToSave : item));
-      setEditIdx(null);
-    } else {
-      setKpiList((prev) => [...prev, dataToSave]);
+
+    console.log('🔍 Data to save:', dataToSave);
+
+    try {
+      if (editIdx !== null) {
+        // Update existing KPI
+        console.log('🔍 Updating existing KPI at index:', editIdx);
+        console.log('🔍 Current KPI to update:', kpiList[editIdx]);
+        const updatedKPI = await kpiService.updateKPI(kpiList[editIdx].id, dataToSave);
+        console.log('🔍 Updated KPI from Supabase:', updatedKPI);
+        console.log('🔍 Updated KPI structure:', {
+          id: updatedKPI.id,
+          department: updatedKPI.department,
+          kategori_utama: updatedKPI.kategori_utama,
+          kpi_statement: updatedKPI.kpi_statement,
+          measurement_type: updatedKPI.measurement_type,
+          target_value: updatedKPI.target_value,
+          achievement_data: updatedKPI.achievement_data
+        });
+        
+        // Transform Supabase format back to frontend format
+        const transformedUpdatedKPI = {
+          id: updatedKPI.id,
+          department: updatedKPI.department,
+          kategoriUtama: updatedKPI.kategori_utama,
+          kpi: updatedKPI.kpi_statement,
+          kategori: updatedKPI.measurement_type,
+          target: updatedKPI.target_value,
+          bilangan: updatedKPI.achievement_data?.bilangan || { sasaran: "", pencapaian: "" },
+          peratus: updatedKPI.achievement_data?.peratus || { x: "", y: "", labelX: "", labelY: "" },
+          masa: updatedKPI.achievement_data?.masa || { sasaranTarikh: "", tarikhCapai: "" },
+          tahap: updatedKPI.achievement_data?.tahap || [
+            { statement: "", percent: "" },
+            { statement: "", percent: "" },
+            { statement: "", percent: "" },
+            { statement: "", percent: "" }
+          ],
+          tahapSelected: updatedKPI.achievement_data?.tahapSelected || null,
+          peratusMinimum: updatedKPI.achievement_data?.peratusMinimum || { x: "", y: "", labelX: "", labelY: "" },
+          peruntukan: updatedKPI.budget?.toString() || "",
+          perbelanjaan: updatedKPI.expenditure?.toString() || "",
+          percentBelanja: updatedKPI.percent_belanjawan || "-"
+        };
+        
+        console.log('🔍 Transformed updated KPI:', transformedUpdatedKPI);
+        
+        // Update local state
+        const newKpiList = [...kpiList];
+        newKpiList[editIdx] = transformedUpdatedKPI;
+        console.log('🔍 New KPI list after update:', newKpiList);
+        
+        setKpiList(newKpiList);
+        setEditIdx(null);
+      } else {
+        // Create new KPI
+        console.log('🔍 Creating new KPI...');
+        const newKPI = await kpiService.createKPI(dataToSave);
+        console.log('🔍 New KPI created:', newKPI);
+        
+        // Transform the new KPI to match frontend format
+        const transformedNewKPI = {
+          id: newKPI.id,
+          department: newKPI.department,
+          kategoriUtama: newKPI.kategori_utama,
+          kpi: newKPI.kpi_statement,
+          kategori: newKPI.measurement_type,
+          target: newKPI.target_value,
+          bilangan: newKPI.achievement_data?.bilangan || { sasaran: "", pencapaian: "" },
+          peratus: newKPI.achievement_data?.peratus || { x: "", y: "", labelX: "", labelY: "" },
+          masa: newKPI.achievement_data?.masa || { sasaranTarikh: "", tarikhCapai: "" },
+          tahap: newKPI.achievement_data?.tahap || [
+            { statement: "", percent: "" },
+            { statement: "", percent: "" },
+            { statement: "", percent: "" },
+            { statement: "", percent: "" }
+          ],
+          tahapSelected: newKPI.achievement_data?.tahapSelected || null,
+          peratusMinimum: newKPI.achievement_data?.peratusMinimum || { x: "", y: "", labelX: "", labelY: "" },
+          peruntukan: newKPI.budget?.toString() || "",
+          perbelanjaan: newKPI.expenditure?.toString() || "",
+          percentBelanja: newKPI.percent_belanjawan || "-"
+        };
+        
+        console.log('🔍 Transformed new KPI:', transformedNewKPI);
+        
+        // Update local state with the transformed KPI
+        setKpiList((prev) => [...prev, transformedNewKPI]);
+        console.log('🔍 Updated kpiList with new KPI');
+      }
+      setForm(initialForm);
+      setTahapSelected(null);
+    } catch (error) {
+      console.error('❌ Error saving KPI:', error);
+      alert('Ralat sistem. Sila cuba lagi.');
     }
-    setForm(initialForm);
-    setTahapSelected(null);
   };
 
   const handleEdit = (idx) => {
+    console.log('🔍 handleEdit called for index:', idx);
+    console.log('🔍 KPI to edit:', kpiList[idx]);
+    console.log('🔍 KPI structure:', {
+      id: kpiList[idx].id,
+      department: kpiList[idx].department,
+      kategoriUtama: kpiList[idx].kategoriUtama,
+      kpi: kpiList[idx].kpi,
+      kategori: kpiList[idx].kategori,
+      target: kpiList[idx].target,
+      achievement_data: kpiList[idx].achievement_data
+    });
+    
     setForm(kpiList[idx]);
     setEditIdx(idx);
     if (kpiList[idx].kategori === "Tahap Kemajuan") {
@@ -246,9 +380,20 @@ function AdminUtama({ kpiList, setKpiList, handleDownloadExcel, handleExcelUploa
   }
 
   // Tambah handler delete
-  const handleDelete = (idx) => {
+  const handleDelete = async (idx) => {
     if (window.confirm('Anda pasti mahu padam data ini?')) {
-      setKpiList(prev => prev.filter((_, i) => i !== idx));
+      try {
+        const kpiToDelete = kpiList[idx];
+        if (kpiToDelete.id) {
+          // Delete from Supabase
+          await kpiService.deleteKPI(kpiToDelete.id);
+        }
+        // Update local state
+        setKpiList(prev => prev.filter((_, i) => i !== idx));
+      } catch (error) {
+        console.error('❌ Error deleting KPI:', error);
+        alert('Ralat sistem. Sila cuba lagi.');
+      }
     }
   };
 
