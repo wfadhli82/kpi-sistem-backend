@@ -3,17 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
   build-and-deploy:
@@ -22,8 +14,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
       
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -31,15 +21,8 @@ jobs:
         node-version: '18'
         cache: 'npm'
         
-    - name: Clear cache and install dependencies
-      run: |
-        npm cache clean --force
-        npm ci
-        
-    - name: Verify public folder
-      run: |
-        ls -la public/
-        cat public/index.html
+    - name: Install dependencies
+      run: npm ci
         
     - name: Build with environment variables
       env:
@@ -52,14 +35,8 @@ jobs:
         REACT_APP_DEFAULT_ADMIN_DEPARTMENT: ${{ secrets.REACT_APP_DEFAULT_ADMIN_DEPARTMENT }}
       run: npm run build
       
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-      
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: ./build
-        
     - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4 
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build 
