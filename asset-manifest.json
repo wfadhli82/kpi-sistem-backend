@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/kpi-sistem-backend/static/css/main.e6c13ad2.css",
+    "main.js": "/kpi-sistem-backend/static/js/main.c625cbce.js",
+    "static/js/453.face5969.chunk.js": "/kpi-sistem-backend/static/js/453.face5969.chunk.js",
+    "index.html": "/kpi-sistem-backend/index.html",
+    "main.e6c13ad2.css.map": "/kpi-sistem-backend/static/css/main.e6c13ad2.css.map",
+    "main.c625cbce.js.map": "/kpi-sistem-backend/static/js/main.c625cbce.js.map",
+    "453.face5969.chunk.js.map": "/kpi-sistem-backend/static/js/453.face5969.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.c625cbce.js"
+  ]
+}
