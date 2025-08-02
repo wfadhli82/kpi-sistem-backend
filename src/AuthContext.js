@@ -72,6 +72,7 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Priority: admin > admin_bahagian > user
+      // eslint-disable-next-line no-unused-vars
       const priorityOrder = { 'admin': 3, 'admin_bahagian': 2, 'user': 1 };
       const highestPriorityUser = user;
       
