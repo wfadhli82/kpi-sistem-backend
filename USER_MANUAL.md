@@ -18,7 +18,7 @@
 
 ### Accessing the System
 1. **Open Browser** - Chrome, Firefox, Safari, atau Edge
-2. **Navigate to:** https://wfadhli82.github.io/kpi-sistem-local/
+2. **Navigate to:** https://wfadhli82.github.io/kpi-sistem-backend/
 3. **Login Page** - Akan muncul secara automatik
 
 ### First Time Setup
@@ -388,7 +388,7 @@
 ### Contact Information
 - **Developer:** Wan Fadhli
 - **Email:** wfadhli82@gmail.com
-- **System URL:** https://wfadhli82.github.io/kpi-sistem-local/
+- **System URL:** https://wfadhli82.github.io/kpi-sistem-backend/
 
 ### Getting Help
 1. **Check this manual** - Most issues covered here

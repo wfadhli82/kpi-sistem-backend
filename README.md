@@ -162,7 +162,7 @@ npm run deploy
 ## 🚀 Deployment
 
 ### GitHub Pages
-- **URL:** https://wfadhli82.github.io/kpi-sistem-local/
+- **URL:** https://wfadhli82.github.io/kpi-sistem-backend/
 - **Branch:** gh-pages (auto-generated)
 - **CI/CD:** GitHub Actions workflow
 
@@ -218,7 +218,7 @@ npm run deploy
 ### Contact
 - **Developer:** Wan Fadhli
 - **Email:** wfadhli82@gmail.com
-- **Repository:** https://github.com/wfadhli82/kpi-sistem-local
+- **Repository:** https://github.com/wfadhli82/kpi-sistem-backend
 
 ## 🎉 Acknowledgments
 
