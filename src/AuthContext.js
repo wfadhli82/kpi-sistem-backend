@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import app from './firebase';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { supabase, userService } from './supabase';
 
 const AuthContext = createContext({});
 
@@ -15,97 +14,70 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // Function to initialize default users if not exists
-  const initializeDefaultUsers = () => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    if (users.length === 0) {
-      const defaultUsers = [
-        {
-          id: 'admin-001',
-          name: 'Admin Utama',
-          email: 'wfadhli82@gmail.com',
-          password: 'admin123', // default password
-          role: 'admin',
-          department: 'Pentadbiran'
+  const initializeDefaultUsers = async () => {
+    try {
+      const users = await userService.getAllUsers();
+      if (users.length === 0) {
+        const defaultUsers = [
+          {
+            name: 'Admin Utama',
+            email: 'wfadhli82@gmail.com',
+            password: 'admin123',
+            role: 'admin',
+            department_name: 'Pentadbiran'
+          }
+        ];
+        
+        for (const userData of defaultUsers) {
+          await userService.createUser(userData);
         }
-      ];
-      localStorage.setItem('users', JSON.stringify(defaultUsers));
-      console.log('Default users initialized:', defaultUsers);
-    } else {
-      // Check if admin user exists, if not add it
-      const adminExists = users.some(user => user.email === 'wfadhli82@gmail.com' && user.role === 'admin');
-      if (!adminExists) {
-        const adminUser = {
-          id: 'admin-001',
-          name: 'Admin Utama',
-          email: 'wfadhli82@gmail.com',
-          password: 'admin123',
-          role: 'admin',
-          department: 'Pentadbiran'
-        };
-        users.push(adminUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        console.log('Admin user added:', adminUser);
+        console.log('✅ Default users initialized:', defaultUsers);
       } else {
-        // Ensure admin user has password
-        const adminUser = users.find(user => user.email === 'wfadhli82@gmail.com' && user.role === 'admin');
-        if (adminUser && !adminUser.password) {
-          adminUser.password = 'admin123';
-          localStorage.setItem('users', JSON.stringify(users));
-          console.log('Password added to existing admin user:', adminUser);
+        // Check if admin user exists, if not add it
+        const adminExists = users.some(user => user.email === 'wfadhli82@gmail.com' && user.role === 'admin');
+        if (!adminExists) {
+          const adminUser = {
+            name: 'Admin Utama',
+            email: 'wfadhli82@gmail.com',
+            password: 'admin123',
+            role: 'admin',
+            department_name: 'Pentadbiran'
+          };
+          await userService.createUser(adminUser);
+          console.log('✅ Admin user added:', adminUser);
+        } else {
+          // Ensure admin user has password
+          const adminUser = users.find(user => user.email === 'wfadhli82@gmail.com' && user.role === 'admin');
+          if (adminUser && !adminUser.password) {
+            await userService.updateUser(adminUser.id, { password: 'admin123' });
+            console.log('✅ Password added to existing admin user:', adminUser);
+          }
         }
       }
+    } catch (error) {
+      console.error('❌ Error initializing default users:', error);
     }
   };
 
-  // Function to get user info from Firebase and localStorage
+  // Function to get user info from Supabase
   const getUserInfo = async (email) => {
     try {
-      // Try to get users from Firebase first
-      const db = getFirestore(app);
-      const usersCollection = collection(db, 'users');
-      const querySnapshot = await getDocs(usersCollection);
-      
-      const firebaseUsers = [];
-      querySnapshot.forEach((doc) => {
-        firebaseUsers.push({ id: doc.id, ...doc.data() });
-      });
-      
-      const matchingUsers = firebaseUsers.filter(u => u.email === email);
-      if (matchingUsers.length === 0) {
-        // Fallback to localStorage
-        const localUsers = JSON.parse(localStorage.getItem('users') || '[]');
-        const localMatchingUsers = localUsers.filter(u => u.email === email);
-        if (localMatchingUsers.length === 0) {
-          return { role: 'user', department: null };
-        }
-        // Priority: admin > admin_bahagian > user
-        const priorityOrder = { 'admin': 3, 'admin_bahagian': 2, 'user': 1 };
-        const highestPriorityUser = localMatchingUsers.reduce((prev, current) => {
-          return (priorityOrder[current.role] || 0) > (priorityOrder[prev.role] || 0) ? current : prev;
-        });
-        return { role: highestPriorityUser.role, department: highestPriorityUser.department };
-      }
-      
-      // Priority: admin > admin_bahagian > user
-      const priorityOrder = { 'admin': 3, 'admin_bahagian': 2, 'user': 1 };
-      const highestPriorityUser = matchingUsers.reduce((prev, current) => {
-        return (priorityOrder[current.role] || 0) > (priorityOrder[prev.role] || 0) ? current : prev;
-      });
-      return { role: highestPriorityUser.role, department: highestPriorityUser.department };
-    } catch (error) {
-      console.error('❌ Error getting user info from Firebase:', error);
-      // Fallback to localStorage
-      const localUsers = JSON.parse(localStorage.getItem('users') || '[]');
-      const localMatchingUsers = localUsers.filter(u => u.email === email);
-      if (localMatchingUsers.length === 0) {
+      const user = await userService.getUserByEmail(email);
+      if (!user) {
         return { role: 'user', department: null };
       }
+      
       // Priority: admin > admin_bahagian > user
       const priorityOrder = { 'admin': 3, 'admin_bahagian': 2, 'user': 1 };
-      const highestPriorityUser = localMatchingUsers.reduce((prev, current) => {
-        return (priorityOrder[current.role] || 0) > (priorityOrder[prev.role] || 0) ? current : prev;
-      });
-      return { role: highestPriorityUser.role, department: highestPriorityUser.department };
+      const highestPriorityUser = user;
+      
+      return { 
+        role: highestPriorityUser.role, 
+        department: highestPriorityUser.department_name 
+      };
+    } catch (error) {
+      console.error('❌ Error getting user info from Supabase:', error);
+      return { role: 'user', department: null };
     }
   };
 
