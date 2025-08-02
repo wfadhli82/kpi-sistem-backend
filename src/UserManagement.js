@@ -26,8 +26,7 @@ import {
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 import { v4 as uuidv4 } from 'uuid';
-import app from './firebase';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc } from 'firebase/firestore';
+import { userService } from './supabase';
 
 // Available departments
 const departments = [
@@ -49,29 +48,19 @@ const UserManagement = () => {
   });
   const [alert, setAlert] = useState({ show: false, message: '', severity: 'success' });
 
-
-
-  // Load users from Firebase on component mount
+  // Load users from Supabase on component mount
   useEffect(() => {
-    loadUsersFromFirebase();
+    loadUsersFromSupabase();
   }, []);
 
-  const loadUsersFromFirebase = async () => {
+  const loadUsersFromSupabase = async () => {
     try {
-      const db = getFirestore(app);
-      const usersCollection = collection(db, 'users');
-      const querySnapshot = await getDocs(usersCollection);
-      
-      const firebaseUsers = [];
-      querySnapshot.forEach((doc) => {
-        firebaseUsers.push({ id: doc.id, ...doc.data() });
-      });
-      
-      setUsers(firebaseUsers);
-      console.log('✅ Loaded users from Firebase:', firebaseUsers.length);
+      const users = await userService.getAllUsers();
+      setUsers(users);
+      console.log('✅ Loaded users from Supabase:', users.length);
     } catch (error) {
-      console.error('❌ Error loading users from Firebase:', error);
-      // Fallback to localStorage if Firebase fails
+      console.error('❌ Error loading users from Supabase:', error);
+      // Fallback to localStorage if Supabase fails
       const savedUsers = localStorage.getItem('users');
       if (savedUsers) {
         setUsers(JSON.parse(savedUsers));
@@ -79,42 +68,39 @@ const UserManagement = () => {
     }
   };
 
-  const saveUsersToFirebase = useCallback(async () => {
+  const saveUsersToSupabase = useCallback(async () => {
     try {
-      const db = getFirestore(app);
-      const usersCollection = collection(db, 'users');
-      
       // Clear existing users and add all current users
-      const querySnapshot = await getDocs(usersCollection);
-      querySnapshot.forEach(async (doc) => {
-        await deleteDoc(doc.ref);
-      });
+      const existingUsers = await userService.getAllUsers();
+      for (const user of existingUsers) {
+        await userService.deleteUser(user.id);
+      }
       
       // Add all current users
       for (const user of users) {
-        await addDoc(usersCollection, {
+        await userService.createUser({
           name: user.name,
           email: user.email,
           password: user.password,
           role: user.role,
-          department: user.department
+          department_name: user.department
         });
       }
       
-      console.log('✅ Saved users to Firebase');
+      console.log('✅ Saved users to Supabase');
     } catch (error) {
-      console.error('❌ Error saving users to Firebase:', error);
+      console.error('❌ Error saving users to Supabase:', error);
       // Fallback to localStorage
       localStorage.setItem('users', JSON.stringify(users));
     }
   }, [users]);
 
-  // Save users to Firebase whenever users state changes
+  // Save users to Supabase whenever users state changes
   useEffect(() => {
     if (users.length > 0) {
-      saveUsersToFirebase();
+      saveUsersToSupabase();
     }
-  }, [saveUsersToFirebase]);
+  }, [saveUsersToSupabase]);
 
   const handleOpenDialog = (user = null) => {
     if (user) {

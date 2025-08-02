@@ -3,65 +3,147 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Check if Supabase credentials are available
+const hasSupabaseCredentials = supabaseUrl && supabaseAnonKey && 
+  supabaseUrl !== 'your_supabase_project_url_here' && 
+  supabaseAnonKey !== 'your_supabase_anon_key_here'
+
+export const supabase = hasSupabaseCredentials 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 // Helper functions for KPI system
 export const kpiService = {
   // Get all KPI data
   async getAllKPIs() {
-    const { data, error } = await supabase
-      .from('kpi_data')
-      .select('*')
-      .order('created_at', { ascending: false })
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const saved = localStorage.getItem("kpiList");
+      return saved ? JSON.parse(saved) : []
+    }
     
-    if (error) throw error
-    return data || []
+    try {
+      const { data, error } = await supabase
+        .from('kpi_data')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('❌ Error getting KPIs from Supabase:', error)
+      // Fallback to localStorage
+      const saved = localStorage.getItem("kpiList");
+      return saved ? JSON.parse(saved) : []
+    }
   },
 
   // Get KPI by department
   async getKPIsByDepartment(department) {
-    const { data, error } = await supabase
-      .from('kpi_data')
-      .select('*')
-      .eq('department', department)
-      .order('created_at', { ascending: false })
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const saved = localStorage.getItem("kpiList");
+      const kpiList = saved ? JSON.parse(saved) : []
+      return kpiList.filter(kpi => kpi.department === department)
+    }
     
-    if (error) throw error
-    return data || []
+    try {
+      const { data, error } = await supabase
+        .from('kpi_data')
+        .select('*')
+        .eq('department', department)
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('❌ Error getting KPIs by department:', error)
+      // Fallback to localStorage
+      const saved = localStorage.getItem("kpiList");
+      const kpiList = saved ? JSON.parse(saved) : []
+      return kpiList.filter(kpi => kpi.department === department)
+    }
   },
 
   // Create new KPI
   async createKPI(kpiData) {
-    const { data, error } = await supabase
-      .from('kpi_data')
-      .insert([kpiData])
-      .select()
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const saved = localStorage.getItem("kpiList");
+      const kpiList = saved ? JSON.parse(saved) : []
+      const newKPI = { ...kpiData, id: Date.now().toString() }
+      kpiList.push(newKPI)
+      localStorage.setItem("kpiList", JSON.stringify(kpiList))
+      return newKPI
+    }
     
-    if (error) throw error
-    return data[0]
+    try {
+      const { data, error } = await supabase
+        .from('kpi_data')
+        .insert([kpiData])
+        .select()
+      
+      if (error) throw error
+      return data[0]
+    } catch (error) {
+      console.error('❌ Error creating KPI:', error)
+      throw error
+    }
   },
 
   // Update KPI
   async updateKPI(id, updates) {
-    const { data, error } = await supabase
-      .from('kpi_data')
-      .update(updates)
-      .eq('id', id)
-      .select()
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const saved = localStorage.getItem("kpiList");
+      const kpiList = saved ? JSON.parse(saved) : []
+      const index = kpiList.findIndex(kpi => kpi.id === id)
+      if (index !== -1) {
+        kpiList[index] = { ...kpiList[index], ...updates }
+        localStorage.setItem("kpiList", JSON.stringify(kpiList))
+        return kpiList[index]
+      }
+      throw new Error('KPI not found')
+    }
     
-    if (error) throw error
-    return data[0]
+    try {
+      const { data, error } = await supabase
+        .from('kpi_data')
+        .update(updates)
+        .eq('id', id)
+        .select()
+      
+      if (error) throw error
+      return data[0]
+    } catch (error) {
+      console.error('❌ Error updating KPI:', error)
+      throw error
+    }
   },
 
   // Delete KPI
   async deleteKPI(id) {
-    const { error } = await supabase
-      .from('kpi_data')
-      .delete()
-      .eq('id', id)
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const saved = localStorage.getItem("kpiList");
+      const kpiList = saved ? JSON.parse(saved) : []
+      const filtered = kpiList.filter(kpi => kpi.id !== id)
+      localStorage.setItem("kpiList", JSON.stringify(filtered))
+      return true
+    }
     
-    if (error) throw error
-    return true
+    try {
+      const { error } = await supabase
+        .from('kpi_data')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('❌ Error deleting KPI:', error)
+      throw error
+    }
   }
 }
 
@@ -69,59 +151,127 @@ export const kpiService = {
 export const userService = {
   // Get all users
   async getAllUsers() {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .order('created_at', { ascending: false })
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      return JSON.parse(localStorage.getItem('users') || '[]')
+    }
     
-    if (error) throw error
-    return data || []
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .order('created_at', { ascending: false })
+      
+      if (error) throw error
+      return data || []
+    } catch (error) {
+      console.error('❌ Error getting users from Supabase:', error)
+      // Fallback to localStorage
+      return JSON.parse(localStorage.getItem('users') || '[]')
+    }
   },
 
   // Get user by email
   async getUserByEmail(email) {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
-      .single()
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      return users.find(user => user.email === email) || null
+    }
     
-    if (error) throw error
-    return data
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single()
+      
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('❌ Error getting user by email:', error)
+      // Fallback to localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      return users.find(user => user.email === email) || null
+    }
   },
 
   // Create new user
   async createUser(userData) {
-    const { data, error } = await supabase
-      .from('users')
-      .insert([userData])
-      .select()
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const newUser = { ...userData, id: Date.now().toString() }
+      users.push(newUser)
+      localStorage.setItem('users', JSON.stringify(users))
+      return newUser
+    }
     
-    if (error) throw error
-    return data[0]
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .insert([userData])
+        .select()
+      
+      if (error) throw error
+      return data[0]
+    } catch (error) {
+      console.error('❌ Error creating user:', error)
+      throw error
+    }
   },
 
   // Update user
   async updateUser(id, updates) {
-    const { data, error } = await supabase
-      .from('users')
-      .update(updates)
-      .eq('id', id)
-      .select()
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const index = users.findIndex(user => user.id === id)
+      if (index !== -1) {
+        users[index] = { ...users[index], ...updates }
+        localStorage.setItem('users', JSON.stringify(users))
+        return users[index]
+      }
+      throw new Error('User not found')
+    }
     
-    if (error) throw error
-    return data[0]
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', id)
+        .select()
+      
+      if (error) throw error
+      return data[0]
+    } catch (error) {
+      console.error('❌ Error updating user:', error)
+      throw error
+    }
   },
 
   // Delete user
   async deleteUser(id) {
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', id)
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, using localStorage fallback')
+      const users = JSON.parse(localStorage.getItem('users') || '[]')
+      const filtered = users.filter(user => user.id !== id)
+      localStorage.setItem('users', JSON.stringify(filtered))
+      return true
+    }
     
-    if (error) throw error
-    return true
+    try {
+      const { error } = await supabase
+        .from('users')
+        .delete()
+        .eq('id', id)
+      
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('❌ Error deleting user:', error)
+      throw error
+    }
   }
 }
 
@@ -129,6 +279,11 @@ export const userService = {
 export const realtimeService = {
   // Subscribe to KPI changes
   subscribeToKPIChanges(callback) {
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, real-time disabled')
+      return null
+    }
+    
     return supabase
       .channel('kpi_changes')
       .on('postgres_changes', 
@@ -142,6 +297,11 @@ export const realtimeService = {
 
   // Subscribe to user changes
   subscribeToUserChanges(callback) {
+    if (!supabase) {
+      console.warn('⚠️ Supabase not configured, real-time disabled')
+      return null
+    }
+    
     return supabase
       .channel('user_changes')
       .on('postgres_changes', 
