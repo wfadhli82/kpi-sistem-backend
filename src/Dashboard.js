@@ -4,9 +4,8 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import WarningIcon from '@mui/icons-material/Warning';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LabelList, Cell } from 'recharts';
-
-
 
 // Tambah fungsi peratusMinimum jika belum ada
 function peratusMinimum(peruntukan, belanja, targetPercent) {
@@ -100,10 +99,15 @@ function Dashboard({ kpiList = [] }) {
 
   // Kira statistik summary
   const peratusList = filteredList.map(kiraPeratusPencapaian).filter(val => val !== null && !isNaN(val));
-  const purataPencapaian = peratusList.length > 0 ? (peratusList.reduce((a, b) => a + b, 0) / peratusList.length).toFixed(2) : '0.00';
+  const barisKosong = filteredList.length - peratusList.length;
+  
+  // Kira purata termasuk baris kosong sebagai 0%
+  const semuaPeratus = [...peratusList, ...Array(barisKosong).fill(0)];
+  const purataPencapaian = semuaPeratus.length > 0 ? (semuaPeratus.reduce((a, b) => a + b, 0) / semuaPeratus.length).toFixed(2) : '0.00';
+  
   const jumlahSKU = filteredList.length;
-  const capaiSasaran = peratusList.filter(p => p === 100).length;
-  const tidakCapaiSasaran = peratusList.filter(p => p < 100).length;
+  const capaiSasaran = semuaPeratus.filter(p => p === 100).length;
+  const tidakCapaiSasaran = semuaPeratus.filter(p => p < 100).length;
 
   // Data summary cards
   let summaryLabel = 'Jumlah SKU & KPI';
@@ -137,6 +141,13 @@ function Dashboard({ kpiList = [] }) {
       icon: <CancelIcon />,
       iconColor: '#d32f2f',
       borderColor: '#ffebee'
+    },
+    { 
+      label: 'Tiada Data Pencapaian', 
+      value: barisKosong, 
+      icon: <WarningIcon />,
+      iconColor: '#f57c00',
+      borderColor: '#fff3e0'
     },
   ];
 
@@ -184,7 +195,7 @@ function Dashboard({ kpiList = [] }) {
   ];
   const dataTaburan = taburan.map(range => ({
     name: range.label,
-    value: peratusList.filter(p => p >= range.min && p <= range.max).length,
+    value: semuaPeratus.filter(p => p >= range.min && p <= range.max).length,
     color: range.color
   }));
 
@@ -263,12 +274,12 @@ function Dashboard({ kpiList = [] }) {
               <Paper 
                 elevation={2} 
                 sx={{ 
-                  p: 3.5, 
+                  p: 3, 
                   borderRadius: 4,
                   background: '#ffffff',
                   border: '1px solid #f0f0f0',
                   transition: 'all 0.3s ease',
-                  height: '160px',
+                  height: '140px',
                   display: 'flex',
                   alignItems: 'center',
                   '&:hover': {
@@ -280,8 +291,8 @@ function Dashboard({ kpiList = [] }) {
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   <Box sx={{ 
-                    width: 56, 
-                    height: 56, 
+                    width: 48, 
+                    height: 48, 
                     borderRadius: '50%', 
                     background: '#ffffff',
                     display: 'flex',
@@ -294,7 +305,7 @@ function Dashboard({ kpiList = [] }) {
                   }}>
                     <Box sx={{ 
                       color: item.iconColor,
-                      fontSize: 24
+                      fontSize: 20
                     }}>
                       {item.icon}
                     </Box>
@@ -306,7 +317,7 @@ function Dashboard({ kpiList = [] }) {
                         fontWeight: 800, 
                         color: '#111827', 
                         mb: 1.5,
-                        fontSize: '2.25rem',
+                        fontSize: '1.75rem',
                         lineHeight: 1.1,
                         height: 'auto',
                         display: 'flex',
@@ -320,7 +331,7 @@ function Dashboard({ kpiList = [] }) {
                     </Typography>
                     <Typography 
                       sx={{ 
-                        fontSize: 13, 
+                        fontSize: 12, 
                         fontWeight: 600,
                         color: '#4b5563',
                         textTransform: 'uppercase',
@@ -342,6 +353,7 @@ function Dashboard({ kpiList = [] }) {
             </Grid>
           ))}
         </Grid>
+        
         {/* Carta Prestasi Bahagian */}
         <Paper elevation={2} sx={{ p: 4, minHeight: 250, borderRadius: 2, mb: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#1a237e', mb: 3 }}>
@@ -390,6 +402,7 @@ function Dashboard({ kpiList = [] }) {
             </Box>
           )}
         </Paper>
+        
         {/* Carta Taburan Pencapaian */}
         <Paper elevation={2} sx={{ p: 4, minHeight: 250, borderRadius: 2, mb: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
           <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#1a237e', mb: 3 }}>
@@ -437,81 +450,6 @@ function Dashboard({ kpiList = [] }) {
               Tiada data untuk dipaparkan.
             </Box>
           )}
-        </Paper>
-        {/* Carta Bilangan Mengikut Bahagian */}
-        <Paper elevation={2} sx={{ p: 4, minHeight: 250, borderRadius: 2, mb: 3, background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 700, color: '#1a237e', mb: 3 }}>
-            {activeTab === 'kpi' ? 'Bilangan KPI Mengikut Bahagian' : activeTab === 'sku' ? 'Bilangan SKU Mengikut Bahagian' : 'Bilangan SKU dan KPI Mengikut Bahagian'}
-          </Typography>
-          {(() => {
-            // Kira bilangan mengikut bahagian
-            const bahagianCountMap = {};
-            filteredList.forEach(kpi => {
-              let namaBahagian = kpi.department || '-';
-              
-              // Kumpulkan semua bahagian BPI di bawah satu nama "BPI"
-              if (namaBahagian.startsWith('BPI-') || namaBahagian.startsWith('BPI - ')) {
-                namaBahagian = 'BPI';
-              }
-              
-              if (!bahagianCountMap[namaBahagian]) {
-                bahagianCountMap[namaBahagian] = 0;
-              }
-              bahagianCountMap[namaBahagian]++;
-            });
-            
-            const dataBilangan = Object.entries(bahagianCountMap).map(([name, value]) => ({
-              name,
-              value
-            })).sort((a, b) => b.value - a.value);
-            
-            return dataBilangan.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={dataBilangan} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e3eafc" />
-                  <XAxis 
-                    dataKey="name" 
-                    tick={{ fontSize: 14, fill: '#333', fontWeight: 600 }}
-                    axisLabel={{ value: 'Bahagian', position: 'insideBottom', offset: -10, fontSize: 16, fontWeight: 700, fill: '#1a237e' }}
-                  />
-                  <YAxis 
-                    allowDecimals={false} 
-                    tick={{ fontSize: 14, fill: '#333', fontWeight: 600 }}
-                    axisLabel={{ value: 'Bilangan', angle: -90, position: 'insideLeft', offset: 10, fontSize: 16, fontWeight: 700, fill: '#1a237e' }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#fff', 
-                      border: '1px solid #e3eafc', 
-                      borderRadius: 8,
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="value" 
-                    radius={[8, 8, 0, 0]}
-                    fill="url(#gradient3)"
-                  >
-                    <LabelList 
-                      dataKey="value" 
-                      position="top" 
-                      style={{ fontSize: 16, fontWeight: 700, fill: '#333' }}
-                    />
-                  </Bar>
-                  <defs>
-                    <linearGradient id="gradient3" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#9c27b0" />
-                      <stop offset="100%" stopColor="#7b1fa2" />
-                    </linearGradient>
-                  </defs>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <Box sx={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}>
-                Tiada data untuk dipaparkan.
-              </Box>
-            );
-          })()}
         </Paper>
       </Box>
     </Box>
