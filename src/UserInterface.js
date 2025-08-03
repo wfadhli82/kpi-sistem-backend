@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAuth } from './AuthContext';
 
 const departments = [
-  "BAZ", "BKP", "BPA", "BPPH", "BPSM", "BPI - Dar Assaadah", "BPI - Darul Ilmi", "BPI - Darul Kifayah", "BPI - HQ", "BPI - IKB", "BPI - PMA", "BPI - SMA-MAIWP", "BPI - SMISTA", "BTM", "MCL", "MCP", "UAD", "UI", "UKK", "UUU", "BWP"
+  "BAZ", "BKP", "BPA", "BPPH", "BPSM", "BPI - Dar Assaadah", "BPI - Darul Ilmi", "BPI - Darul Kifayah", "BPI - HQ", "BPI - IKB", "BPI - PMA", "BPI - SMA-MAIWP", "BPI - SMISTA", "BTM", "BWP", "MCL", "MCP", "UAD", "UI", "UKK", "UUU"
 ];
 
 function UserInterface({ kpiList, onUpdateKPI }) {
