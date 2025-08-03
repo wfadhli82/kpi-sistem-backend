@@ -98,9 +98,16 @@ const UserManagement = () => {
   // Save users to Supabase whenever users state changes
   useEffect(() => {
     if (users.length > 0) {
-      saveUsersToSupabase();
+      // Only save if there are actual changes
+      const savedUsers = localStorage.getItem('users');
+      const currentUsersString = JSON.stringify(users);
+      
+      if (savedUsers !== currentUsersString) {
+        saveUsersToSupabase();
+        localStorage.setItem('users', currentUsersString);
+      }
     }
-  }, [saveUsersToSupabase]);
+  }, [users, saveUsersToSupabase]);
 
   const handleOpenDialog = (user = null) => {
     if (user) {
@@ -143,7 +150,7 @@ const UserManagement = () => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.name || !formData.email || !formData.role) {
       setAlert({
         show: true,
@@ -182,15 +189,35 @@ const UserManagement = () => {
         delete updatedUser.password;
       }
       
-      const updatedUsers = users.map(user =>
-        user.id === editingUser.id ? updatedUser : user
-      );
-      setUsers(updatedUsers);
-      setAlert({
-        show: true,
-        message: 'Pengguna berjaya dikemaskini',
-        severity: 'success'
-      });
+      // Update in Supabase
+      try {
+        await userService.updateUser(editingUser.id, {
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          department_name: updatedUser.department,
+          ...(formData.password && { password: formData.password })
+        });
+        
+        // Update local state
+        const updatedUsers = users.map(user =>
+          user.id === editingUser.id ? updatedUser : user
+        );
+        setUsers(updatedUsers);
+        
+        setAlert({
+          show: true,
+          message: 'Pengguna berjaya dikemaskini',
+          severity: 'success'
+        });
+      } catch (error) {
+        console.error('❌ Error updating user:', error);
+        setAlert({
+          show: true,
+          message: 'Ralat semasa mengemaskini pengguna',
+          severity: 'error'
+        });
+      }
     } else {
       // Add new user
       const newUser = {
@@ -207,15 +234,25 @@ const UserManagement = () => {
     handleCloseDialog();
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = async (userId) => {
     if (window.confirm('Adakah anda pasti mahu memadamkan pengguna ini?')) {
-      const updatedUsers = users.filter(user => user.id !== userId);
-      setUsers(updatedUsers);
-      setAlert({
-        show: true,
-        message: 'Pengguna berjaya dipadamkan',
-        severity: 'success'
-      });
+      try {
+        await userService.deleteUser(userId);
+        const updatedUsers = users.filter(user => user.id !== userId);
+        setUsers(updatedUsers);
+        setAlert({
+          show: true,
+          message: 'Pengguna berjaya dipadamkan',
+          severity: 'success'
+        });
+      } catch (error) {
+        console.error('❌ Error deleting user:', error);
+        setAlert({
+          show: true,
+          message: 'Ralat semasa memadamkan pengguna',
+          severity: 'error'
+        });
+      }
     }
   };
 
