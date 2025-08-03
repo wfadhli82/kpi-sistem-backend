@@ -22,8 +22,8 @@
 3. **Login Page** - Akan muncul secara automatik
 
 ### First Time Setup
-- **Default Admin:** wfadhli82@gmail.com
-- **Default Password:** admin123
+- **Default Admin:** admin@maiwp.gov.my
+- **Default Password:** ChangeMe123!
 - **Role:** Admin Utama (full access)
 
 ---
@@ -387,7 +387,7 @@
 
 ### Contact Information
 - **Developer:** Wan Fadhli
-- **Email:** wfadhli82@gmail.com
+- **Email:** admin@maiwp.gov.my
 - **System URL:** https://wfadhli82.github.io/kpi-sistem-backend/
 
 ### Getting Help
