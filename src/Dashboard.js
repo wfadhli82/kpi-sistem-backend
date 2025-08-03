@@ -109,6 +109,69 @@ function Dashboard({ kpiList = [] }) {
   const capaiSasaran = semuaPeratus.filter(p => p === 100).length;
   const tidakCapaiSasaran = semuaPeratus.filter(p => p < 100).length;
 
+  // Fungsi untuk drill down
+  const handleDrillDown = (type) => {
+    let data = [];
+    let title = '';
+    
+    switch(type) {
+      case 'capai-sasaran':
+        data = filteredList.filter((kpi, index) => {
+          const percent = kiraPeratusPencapaian(kpi);
+          return percent === 100;
+        });
+        title = 'SKU/KPI yang Capai Sasaran (100%)';
+        break;
+      case 'tidak-capai-sasaran':
+        data = filteredList.filter((kpi, index) => {
+          const percent = kiraPeratusPencapaian(kpi);
+          return percent !== null && percent < 100;
+        });
+        title = 'SKU/KPI yang Tidak Capai Sasaran (<100%)';
+        break;
+      case 'tiada-data':
+        data = filteredList.filter((kpi, index) => {
+          const percent = kiraPeratusPencapaian(kpi);
+          return percent === null;
+        });
+        title = 'SKU/KPI yang Tiada Data Pencapaian';
+        break;
+      case 'semua':
+        data = filteredList;
+        title = 'Semua SKU/KPI';
+        break;
+      default:
+        return;
+    }
+    
+    // Debug: Log first item to see structure
+    if (data.length > 0) {
+      console.log('Drill down data structure:', data[0]);
+      console.log('Available keys:', Object.keys(data[0]));
+    }
+    
+    // Sort data berdasarkan peratus pencapaian (descending)
+    data.sort((a, b) => {
+      const percentA = kiraPeratusPencapaian(a);
+      const percentB = kiraPeratusPencapaian(b);
+      
+      // Handle null values (tiada data)
+      if (percentA === null && percentB === null) return 0;
+      if (percentA === null) return 1; // null values di belakang
+      if (percentB === null) return -1;
+      
+      return percentB - percentA; // Descending order
+    });
+    
+    // Simpan data ke localStorage dan buka halaman baru
+    localStorage.setItem('drillDownData', JSON.stringify(data));
+    localStorage.setItem('drillDownTitle', title);
+    localStorage.setItem('drillDownType', type);
+    
+    // Buka halaman baru
+    window.open('/kpi-sistem-backend/drill-down', '_blank');
+  };
+
   // Data summary cards
   let summaryLabel = 'Jumlah SKU & KPI';
   if (activeTab === 'kpi') summaryLabel = 'Bilangan Keseluruhan KPI';
@@ -119,35 +182,40 @@ function Dashboard({ kpiList = [] }) {
       value: purataPencapaian + '%', 
       icon: <TrendingUpIcon />,
       iconColor: '#1976d2',
-      borderColor: '#e3f2fd'
+      borderColor: '#e3f2fd',
+      onClick: () => handleDrillDown('semua')
     },
     { 
       label: summaryLabel, 
       value: jumlahSKU, 
       icon: <AssessmentIcon />,
       iconColor: '#424242',
-      borderColor: '#f5f5f5'
+      borderColor: '#f5f5f5',
+      onClick: () => handleDrillDown('semua')
     },
     { 
       label: 'Capai Sasaran', 
       value: capaiSasaran, 
       icon: <CheckCircleIcon />,
       iconColor: '#2e7d32',
-      borderColor: '#e8f5e8'
+      borderColor: '#e8f5e8',
+      onClick: () => handleDrillDown('capai-sasaran')
     },
     { 
       label: 'Tidak Capai Sasaran', 
       value: tidakCapaiSasaran, 
       icon: <CancelIcon />,
       iconColor: '#d32f2f',
-      borderColor: '#ffebee'
+      borderColor: '#ffebee',
+      onClick: () => handleDrillDown('tidak-capai-sasaran')
     },
     { 
       label: 'Tiada Data Pencapaian', 
       value: barisKosong, 
       icon: <WarningIcon />,
       iconColor: '#f57c00',
-      borderColor: '#fff3e0'
+      borderColor: '#fff3e0',
+      onClick: () => handleDrillDown('tiada-data')
     },
   ];
 
@@ -173,7 +241,7 @@ function Dashboard({ kpiList = [] }) {
   const dataBahagian = Object.values(bahagianMap).map(b => ({
     name: b.name,
     value: b.total > 0 ? Number((b.jumlah / b.total).toFixed(2)) : 0
-  })).sort((a, b) => b.value - a.value);
+  })).sort((a, b) => b.value - a.value); // Sort descending berdasarkan purata peratus pencapaian
 
   // Function untuk tentukan warna berdasarkan peratus pencapaian
   const getBarColor = (value) => {
@@ -183,6 +251,66 @@ function Dashboard({ kpiList = [] }) {
     if (value >= 70) return '#90caf9'; // Biru sangat cerah untuk 70-79%
     if (value >= 60) return '#bbdefb'; // Biru sangat terang untuk 60-69%
     return '#e3f2fd'; // Biru paling terang untuk <60%
+  };
+
+  // Fungsi untuk drill down carta bahagian
+  const handleChartDrillDown = (bahagianName) => {
+    const data = filteredList.filter(kpi => {
+      let namaBahagian = kpi.department || '-';
+      if (namaBahagian.startsWith('BPI-') || namaBahagian.startsWith('BPI - ')) {
+        namaBahagian = 'BPI';
+      }
+      return namaBahagian === bahagianName;
+    });
+    
+    // Sort data berdasarkan peratus pencapaian (descending)
+    data.sort((a, b) => {
+      const percentA = kiraPeratusPencapaian(a);
+      const percentB = kiraPeratusPencapaian(b);
+      
+      if (percentA === null && percentB === null) return 0;
+      if (percentA === null) return 1;
+      if (percentB === null) return -1;
+      
+      return percentB - percentA;
+    });
+    
+    // Simpan data ke localStorage dan buka halaman baru
+    localStorage.setItem('drillDownData', JSON.stringify(data));
+    localStorage.setItem('drillDownTitle', `SKU/KPI Bahagian: ${bahagianName}`);
+    localStorage.setItem('drillDownType', 'bahagian');
+    
+    // Buka halaman baru
+    window.open('/kpi-sistem-backend/drill-down', '_blank');
+  };
+
+  // Fungsi untuk drill down carta taburan
+  const handleTaburanDrillDown = (range) => {
+    const data = filteredList.filter(kpi => {
+      const percent = kiraPeratusPencapaian(kpi);
+      if (percent === null) return false;
+      return percent >= range.min && percent <= range.max;
+    });
+    
+    // Sort data berdasarkan peratus pencapaian (descending)
+    data.sort((a, b) => {
+      const percentA = kiraPeratusPencapaian(a);
+      const percentB = kiraPeratusPencapaian(b);
+      
+      if (percentA === null && percentB === null) return 0;
+      if (percentA === null) return 1;
+      if (percentB === null) return -1;
+      
+      return percentB - percentA;
+    });
+    
+    // Simpan data ke localStorage dan buka halaman baru
+    localStorage.setItem('drillDownData', JSON.stringify(data));
+    localStorage.setItem('drillDownTitle', `SKU/KPI dengan Pencapaian: ${range.label}`);
+    localStorage.setItem('drillDownType', 'taburan');
+    
+    // Buka halaman baru
+    window.open('/kpi-sistem-backend/drill-down', '_blank');
   };
 
   // Carta 2: Taburan Pencapaian SKU
@@ -196,8 +324,10 @@ function Dashboard({ kpiList = [] }) {
   const dataTaburan = taburan.map(range => ({
     name: range.label,
     value: semuaPeratus.filter(p => p >= range.min && p <= range.max).length,
-    color: range.color
-  }));
+    color: range.color,
+    min: range.min,
+    max: range.max
+  })).sort((a, b) => b.min - a.min); // Sort descending berdasarkan range (100% first, then 90-99%, etc.)
 
   return (
     <Box sx={{ bgcolor: '#f4f6f8', minHeight: '100vh' }}>
@@ -282,12 +412,14 @@ function Dashboard({ kpiList = [] }) {
                   height: '140px',
                   display: 'flex',
                   alignItems: 'center',
+                  cursor: 'pointer',
                   '&:hover': {
                     transform: 'translateY(-4px)',
                     boxShadow: '0 12px 30px rgba(0,0,0,0.12)',
                     border: '1px solid #e0e0e0'
                   }
                 }}
+                onClick={item.onClick}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   <Box sx={{ 
@@ -384,6 +516,8 @@ function Dashboard({ kpiList = [] }) {
                 <Bar 
                   dataKey="value" 
                   radius={[8, 8, 0, 0]}
+                  onClick={(data) => handleChartDrillDown(data.name)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <LabelList 
                     dataKey="value" 
@@ -433,6 +567,11 @@ function Dashboard({ kpiList = [] }) {
                 <Bar 
                   dataKey="value" 
                   radius={[8, 8, 0, 0]}
+                  onClick={(data) => {
+                    const range = taburan.find(r => r.label === data.name);
+                    if (range) handleTaburanDrillDown(range);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <LabelList 
                     dataKey="value" 
@@ -451,6 +590,7 @@ function Dashboard({ kpiList = [] }) {
             </Box>
           )}
         </Paper>
+        
       </Box>
     </Box>
   );

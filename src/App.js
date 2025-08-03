@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider, useAuth } from "./AuthContext";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
+import DrillDownPage from "./DrillDownPage";
 import AdminUtama from "./AdminUtama";
 import UserInterface from "./UserInterface";
 import UserManagement from "./UserManagement";
@@ -585,6 +586,11 @@ export default function App() {
             <Route path="/user-management" element={
               <ProtectedRoute>
                 <MainLayout><UserManagement /></MainLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/drill-down" element={
+              <ProtectedRoute>
+                <MainLayout><DrillDownPage kpiList={kpiList} /></MainLayout>
               </ProtectedRoute>
             } />
           </Routes>
