@@ -548,7 +548,7 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/kpi-sistem-backend">
         <div>
           <Routes>
             <Route path="/login" element={<Login />} />
