@@ -233,10 +233,35 @@ const UserManagement = () => {
         try {
           const verifiedUser = await userService.getUserByEmail(updatedUser.email)
           console.log('🔍 Verified user data:', verifiedUser)
+          
+          // Check if department was actually saved
+          if (verifiedUser && verifiedUser.department_name === updatedUser.department) {
+            console.log('✅ Department successfully saved to Supabase!')
+            setAlert({
+              show: true,
+              message: 'Pengguna berjaya dikemaskini dan disimpan ke database',
+              severity: 'success'
+            });
+          } else {
+            console.warn('⚠️ Department may not have been saved correctly')
+            setAlert({
+              show: true,
+              message: 'Pengguna dikemaskini tapi ada masalah dengan penyimpanan department',
+              severity: 'warning'
+            });
+          }
           console.log('🔍 ===== END VERIFYING UPDATE =====')
         } catch (error) {
           console.error('❌ Error verifying update:', error)
+          setAlert({
+            show: true,
+            message: 'Pengguna dikemaskini tapi gagal verify penyimpanan',
+            severity: 'warning'
+          });
         }
+        
+        // Reload users from Supabase to ensure UI is in sync
+        await loadUsersFromSupabase()
         
         // Update local state
         const updatedUsers = users.map(user =>
@@ -244,8 +269,24 @@ const UserManagement = () => {
         );
         setUsers(updatedUsers);
         
-        // Also update localStorage
+        // Also update localStorage as backup
         localStorage.setItem('users', JSON.stringify(updatedUsers));
+        
+        // Test data persistence after 2 seconds
+        setTimeout(async () => {
+          console.log('🔍 ===== TESTING DATA PERSISTENCE =====')
+          try {
+            const testUser = await userService.getUserByEmail(updatedUser.email)
+            if (testUser && testUser.department_name === updatedUser.department) {
+              console.log('✅ Data persistence test PASSED - department still saved after reload')
+            } else {
+              console.warn('⚠️ Data persistence test FAILED - department lost after reload')
+            }
+            console.log('🔍 ===== END DATA PERSISTENCE TEST =====')
+          } catch (error) {
+            console.error('❌ Error in data persistence test:', error)
+          }
+        }, 2000)
         
         setAlert({
           show: true,
