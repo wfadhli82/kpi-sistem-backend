@@ -230,6 +230,8 @@ const UserManagement = () => {
         
         // Verify the update by fetching the user again
         console.log('🔍 ===== VERIFYING UPDATE =====')
+        console.log('🔍 Checking for email:', updatedUser.email)
+        console.log('🔍 Expected department:', updatedUser.department)
         try {
           const verifiedUser = await userService.getUserByEmail(updatedUser.email)
           console.log('🔍 Verified user data:', verifiedUser)
@@ -287,12 +289,6 @@ const UserManagement = () => {
             console.error('❌ Error in data persistence test:', error)
           }
         }, 2000)
-        
-        setAlert({
-          show: true,
-          message: 'Pengguna berjaya dikemaskini',
-          severity: 'success'
-        });
       } catch (error) {
         console.error('❌ Error updating user:', error);
         setAlert({
