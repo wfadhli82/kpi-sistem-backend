@@ -54,7 +54,7 @@ CREATE TABLE users (
 
 -- Create default admin user
 INSERT INTO users (email, name, password, role, department_name) VALUES
-  ('wfadhli82@gmail.com', 'Admin Utama', 'admin123', 'admin', 'Pentadbiran');
+  ('admin@maiwp.gov.my', 'Admin Utama', 'ChangeMe123!', 'admin', 'Pentadbiran');
 
 -- Create kpi_data table
 CREATE TABLE kpi_data (

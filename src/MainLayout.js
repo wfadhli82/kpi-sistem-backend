@@ -17,7 +17,7 @@ function MainLayout({ children }) {
   const { signOut, user, userRole } = useAuth();
   
   // Temporary bypass for testing - set default user if not logged in
-  const currentUser = user || { email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'wfadhli82@gmail.com' };
+  const currentUser = user || { email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'admin@maiwp.gov.my' };
   const currentUserRole = userRole || 'admin';
   
   console.log('MainLayout - Current user:', user?.email);

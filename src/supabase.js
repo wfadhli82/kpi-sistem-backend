@@ -423,14 +423,28 @@ export const userService = {
     
     try {
       console.log('🔍 Calling Supabase update...')
+      
+      // Clean up updates object - remove undefined values
+      const cleanUpdates = Object.fromEntries(
+        Object.entries(updates).filter(([_, value]) => value !== undefined)
+      );
+      
+      console.log('🔍 Clean updates:', cleanUpdates);
+      
       const { data, error } = await supabase
         .from('users')
-        .update(updates)
+        .update(cleanUpdates)
         .eq('id', id)
         .select()
       
       if (error) {
         console.error('❌ Supabase update error:', error)
+        console.error('❌ Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error
       }
       

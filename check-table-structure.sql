@@ -42,3 +42,26 @@ INSERT INTO kpi_data (
 
 -- Clean up test data
 DELETE FROM kpi_data WHERE department = 'TEST'; 
+
+-- Check users table structure
+SELECT 
+    column_name,
+    data_type,
+    is_nullable,
+    column_default
+FROM information_schema.columns 
+WHERE table_name = 'users' 
+AND table_schema = 'public'
+ORDER BY ordinal_position;
+
+-- Check if department_name column exists
+SELECT column_name 
+FROM information_schema.columns 
+WHERE table_name = 'users' 
+AND table_schema = 'public' 
+AND column_name IN ('department', 'department_name');
+
+-- Check sample data
+SELECT id, name, email, role, department, department_name 
+FROM users 
+LIMIT 5; 

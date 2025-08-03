@@ -23,8 +23,8 @@ export const AuthProvider = ({ children }) => {
         const defaultUsers = [
           {
             name: process.env.REACT_APP_DEFAULT_ADMIN_NAME || 'Admin Utama',
-            email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'wfadhli82@gmail.com',
-            password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'admin123',
+            email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'admin@maiwp.gov.my',
+            password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'ChangeMe123!',
             role: process.env.REACT_APP_DEFAULT_ADMIN_ROLE || 'admin',
             department_name: process.env.REACT_APP_DEFAULT_ADMIN_DEPARTMENT || 'Pentadbiran'
           }
@@ -36,13 +36,13 @@ export const AuthProvider = ({ children }) => {
         console.log('✅ Default users initialized:', defaultUsers);
       } else {
         // Check if admin user exists, if not add it
-        const defaultEmail = process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'wfadhli82@gmail.com';
+        const defaultEmail = process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'admin@maiwp.gov.my';
         const adminExists = users.some(user => user.email === defaultEmail && user.role === 'admin');
         if (!adminExists) {
           const adminUser = {
             name: process.env.REACT_APP_DEFAULT_ADMIN_NAME || 'Admin Utama',
-            email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'wfadhli82@gmail.com',
-            password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'admin123',
+            email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'admin@maiwp.gov.my',
+            password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'ChangeMe123!',
             role: process.env.REACT_APP_DEFAULT_ADMIN_ROLE || 'admin',
             department_name: process.env.REACT_APP_DEFAULT_ADMIN_DEPARTMENT || 'Pentadbiran'
           };
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
           const adminUser = users.find(user => user.email === defaultEmail && user.role === 'admin');
           if (adminUser && !adminUser.password) {
             await userService.updateUser(adminUser.id, { 
-              password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'admin123' 
+              password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'ChangeMe123!' 
             });
             console.log('✅ Password added to existing admin user:', adminUser);
           }
@@ -72,8 +72,8 @@ export const AuthProvider = ({ children }) => {
           {
             id: Date.now().toString(),
             name: 'Admin Utama',
-            email: 'wfadhli82@gmail.com',
-            password: 'admin123',
+            email: 'admin@maiwp.gov.my',
+            password: 'ChangeMe123!',
             role: 'admin',
             department: 'Pentadbiran'
           }

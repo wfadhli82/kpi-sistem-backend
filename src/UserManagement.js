@@ -214,13 +214,19 @@ const UserManagement = () => {
         console.log('🔍 userService available:', !!userService)
         console.log('🔍 userService.updateUser available:', !!userService?.updateUser)
         try {
-          const updateResult = await userService.updateUser(editingUser.id, {
+          // Try to update with both department and department_name fields
+          const updateData = {
             name: updatedUser.name,
             email: updatedUser.email,
             role: updatedUser.role,
+            department: updatedUser.department,
             department_name: updatedUser.department,
             ...(formData.password && { password: formData.password })
-          });
+          };
+          
+          console.log('🔍 Update data being sent:', updateData);
+          
+          const updateResult = await userService.updateUser(editingUser.id, updateData);
           console.log('🔍 Supabase update result:', updateResult)
           console.log('🔍 ===== END SUPABASE UPDATE =====')
         } catch (updateError) {
@@ -232,12 +238,19 @@ const UserManagement = () => {
         console.log('🔍 ===== VERIFYING UPDATE =====')
         console.log('🔍 Checking for email:', updatedUser.email)
         console.log('🔍 Expected department:', updatedUser.department)
+        console.log('🔍 About to call userService.getUserByEmail...')
         try {
           const verifiedUser = await userService.getUserByEmail(updatedUser.email)
           console.log('🔍 Verified user data:', verifiedUser)
           
-          // Check if department was actually saved
-          if (verifiedUser && verifiedUser.department_name === updatedUser.department) {
+          // Check if department was actually saved (try both department and department_name fields)
+          const savedDepartment = verifiedUser?.department || verifiedUser?.department_name;
+          console.log('🔍 Expected department:', updatedUser.department);
+          console.log('🔍 Saved department field:', verifiedUser?.department);
+          console.log('🔍 Saved department_name field:', verifiedUser?.department_name);
+          console.log('🔍 Final saved department:', savedDepartment);
+          
+          if (verifiedUser && savedDepartment === updatedUser.department) {
             console.log('✅ Department successfully saved to Supabase!')
             setAlert({
               show: true,
