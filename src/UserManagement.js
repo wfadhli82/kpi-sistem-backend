@@ -210,13 +210,16 @@ const UserManagement = () => {
         });
         console.log('🔍 ===== END UPDATING USER =====')
         
-        await userService.updateUser(editingUser.id, {
+        console.log('🔍 ===== CALLING SUPABASE UPDATE =====')
+        const updateResult = await userService.updateUser(editingUser.id, {
           name: updatedUser.name,
           email: updatedUser.email,
           role: updatedUser.role,
           department_name: updatedUser.department,
           ...(formData.password && { password: formData.password })
         });
+        console.log('🔍 Supabase update result:', updateResult)
+        console.log('🔍 ===== END SUPABASE UPDATE =====')
         
         // Update local state
         const updatedUsers = users.map(user =>

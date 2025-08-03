@@ -395,6 +395,10 @@ export const userService = {
 
   // Update user
   async updateUser(id, updates) {
+    console.log('🔍 ===== UPDATE USER CALLED =====')
+    console.log('🔍 User ID:', id)
+    console.log('🔍 Updates:', updates)
+    
     if (!supabase) {
       console.warn('⚠️ Supabase not configured, using localStorage fallback')
       const users = JSON.parse(localStorage.getItem('users') || '[]')
@@ -408,13 +412,20 @@ export const userService = {
     }
     
     try {
+      console.log('🔍 Calling Supabase update...')
       const { data, error } = await supabase
         .from('users')
         .update(updates)
         .eq('id', id)
         .select()
       
-      if (error) throw error
+      if (error) {
+        console.error('❌ Supabase update error:', error)
+        throw error
+      }
+      
+      console.log('✅ Supabase update successful:', data[0])
+      console.log('🔍 ===== END UPDATE USER =====')
       return data[0]
     } catch (error) {
       console.error('❌ Error updating user:', error)
