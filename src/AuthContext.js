@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         // Check if admin user exists, if not add it
         const defaultEmail = process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'admin@maiwp.gov.my';
-        const adminExists = users.some(user => user.email === defaultEmail && user.role === 'admin');
+        const adminExists = users.some(user => user.email === defaultEmail && user.role === 'admin_utama');
         if (!adminExists) {
           const adminUser = {
             name: process.env.REACT_APP_DEFAULT_ADMIN_NAME || 'Admin Utama',
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
           console.log('✅ Admin user added:', adminUser);
         } else {
           // Ensure admin user has password
-          const adminUser = users.find(user => user.email === defaultEmail && user.role === 'admin');
+          const adminUser = users.find(user => user.email === defaultEmail && user.role === 'admin_utama');
           if (adminUser && !adminUser.password) {
             await userService.updateUser(adminUser.id, { 
               password: process.env.REACT_APP_DEFAULT_ADMIN_PASSWORD || 'ChangeMe123!' 
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
             name: 'Admin Utama',
             email: 'admin@maiwp.gov.my',
             password: 'ChangeMe123!',
-            role: 'admin',
+            role: 'admin_utama',
             department: 'Pentadbiran'
           }
         ];
@@ -92,12 +92,12 @@ export const AuthProvider = ({ children }) => {
       
       if (!user) {
         console.log('⚠️ User not found, returning default role');
-        return { role: 'user', department: null };
+        return { role: 'pengguna', department: null };
       }
       
-      // Priority: admin > admin_bahagian > user
+      // Priority: admin_utama > sub_admin_utama > admin_bahagian > pengguna
       // eslint-disable-next-line no-unused-vars
-      const priorityOrder = { 'admin': 3, 'admin_bahagian': 2, 'user': 1 };
+      const priorityOrder = { 'admin_utama': 4, 'sub_admin_utama': 3, 'admin_bahagian': 2, 'pengguna': 1 };
       const highestPriorityUser = user;
       
       const userInfo = { 
@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }) => {
           department: localUser.department || localUser.department_name
         };
       }
-      return { role: 'user', department: null };
+              return { role: 'pengguna', department: null };
     }
   };
 

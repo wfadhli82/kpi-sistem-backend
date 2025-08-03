@@ -44,7 +44,7 @@ CREATE TABLE users (
   email TEXT UNIQUE NOT NULL,
   name TEXT,
   password TEXT,
-  role TEXT CHECK (role IN ('admin', 'admin_bahagian', 'user')) DEFAULT 'user',
+  role TEXT CHECK (role IN ('admin_utama', 'sub_admin_utama', 'admin_bahagian', 'pengguna')) DEFAULT 'pengguna',
   department_id UUID REFERENCES departments(id),
   department_name TEXT,
   is_active BOOLEAN DEFAULT TRUE,
@@ -54,7 +54,7 @@ CREATE TABLE users (
 
 -- Create default admin user
 INSERT INTO users (email, name, password, role, department_name) VALUES
-  ('admin@maiwp.gov.my', 'Admin Utama', 'ChangeMe123!', 'admin', 'Pentadbiran');
+  ('admin@maiwp.gov.my', 'Admin Utama', 'ChangeMe123!', 'admin_utama', 'Pentadbiran');
 
 -- Create kpi_data table
 CREATE TABLE kpi_data (
@@ -111,12 +111,12 @@ ALTER TABLE departments ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own profile" ON users
     FOR SELECT USING (auth.uid()::text = id::text);
 
-CREATE POLICY "Admins can view all users" ON users
+CREATE POLICY "Admin Utama can view all users" ON users
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM users 
             WHERE id = auth.uid()::uuid 
-            AND role = 'admin'
+            AND role = 'admin_utama'
         )
     );
 
@@ -124,12 +124,12 @@ CREATE POLICY "Admins can view all users" ON users
 CREATE POLICY "Users can view KPI data" ON kpi_data
     FOR SELECT USING (true);
 
-CREATE POLICY "Admins can manage all KPI data" ON kpi_data
+CREATE POLICY "Admin Utama and Sub Admin Utama can manage all KPI data" ON kpi_data
     FOR ALL USING (
         EXISTS (
             SELECT 1 FROM users 
             WHERE id = auth.uid()::uuid 
-            AND role = 'admin'
+            AND role IN ('admin_utama', 'sub_admin_utama')
         )
     );
 

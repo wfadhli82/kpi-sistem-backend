@@ -348,11 +348,13 @@ const UserManagement = () => {
 
   const getRoleDisplayName = (role) => {
     switch (role) {
-      case 'admin':
+      case 'admin_utama':
         return 'Admin Utama (Semua Akses)';
+      case 'sub_admin_utama':
+        return 'Sub Admin Utama (Dashboard + Admin Utama + Admin Bahagian)';
       case 'admin_bahagian':
         return 'Admin Bahagian (Dashboard + Admin Bahagian)';
-      case 'user':
+      case 'pengguna':
         return 'Pengguna (Dashboard Sahaja)';
       default:
         return role;
@@ -414,7 +416,7 @@ const UserManagement = () => {
                   <IconButton
                     color="error"
                     onClick={() => handleDeleteUser(user.id)}
-                    disabled={user.role === 'admin' && users.filter(u => u.role === 'admin').length === 1}
+                    disabled={user.role === 'admin_utama' && users.filter(u => u.role === 'admin_utama').length === 1}
                   >
                     <Delete />
                   </IconButton>
@@ -475,9 +477,10 @@ const UserManagement = () => {
               label="Peranan"
               onChange={handleInputChange}
             >
-              <MenuItem value="admin">Admin Utama (Semua Akses)</MenuItem>
+              <MenuItem value="admin_utama">Admin Utama (Semua Akses)</MenuItem>
+              <MenuItem value="sub_admin_utama">Sub Admin Utama (Dashboard + Admin Utama + Admin Bahagian)</MenuItem>
               <MenuItem value="admin_bahagian">Admin Bahagian (Dashboard + Admin Bahagian)</MenuItem>
-              <MenuItem value="user">Pengguna (Dashboard Sahaja)</MenuItem>
+              <MenuItem value="pengguna">Pengguna (Dashboard Sahaja)</MenuItem>
             </Select>
           </FormControl>
           <FormControl fullWidth sx={{ mb: 2 }}>

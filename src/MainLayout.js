@@ -18,7 +18,7 @@ function MainLayout({ children }) {
   
   // Temporary bypass for testing - set default user if not logged in
   const currentUser = user || { email: process.env.REACT_APP_DEFAULT_ADMIN_EMAIL || 'admin@maiwp.gov.my' };
-  const currentUserRole = userRole || 'admin';
+  const currentUserRole = userRole || 'admin_utama';
   
   console.log('MainLayout - Current user:', user?.email);
   console.log('MainLayout - Current userRole:', userRole);
@@ -34,7 +34,7 @@ function MainLayout({ children }) {
       console.log('=== DASHBOARD NAVIGATION DEBUG ===');
       console.log('Current userRole:', userRole);
       console.log('Current user:', user?.email);
-      console.log('Menu items should include Pengurusan Pengguna:', userRole === 'admin');
+      console.log('Menu items should include Pengurusan Pengguna:', userRole === 'admin_utama');
     }
   }, [userRole, location.pathname, user?.email]);
   
@@ -45,13 +45,13 @@ function MainLayout({ children }) {
 
   // Filter menu based on user role
   const getFilteredMenu = () => {
-    const allMenu = [
-      { label: 'Dashboard', icon: <DashboardIcon />, path: '/', roles: ['admin', 'admin_bahagian', 'user'] },
-      { label: 'Admin Utama', icon: <AssessmentIcon />, path: '/admin-utama', roles: ['admin'] },
-      { label: 'Admin Bahagian', icon: <NotificationsIcon />, path: '/admin-bahagian', roles: ['admin', 'admin_bahagian'] },
-      { label: 'Pengurusan Pengguna', icon: <PeopleIcon />, path: '/user-management', roles: ['admin'] },
-      { label: 'Log Keluar', icon: <LogoutIcon />, path: null, action: handleLogout, roles: ['admin', 'admin_bahagian', 'user'] },
-    ];
+      const allMenu = [
+    { label: 'Dashboard', icon: <DashboardIcon />, path: '/', roles: ['admin_utama', 'sub_admin_utama', 'admin_bahagian', 'pengguna'] },
+    { label: 'Admin Utama', icon: <AssessmentIcon />, path: '/admin-utama', roles: ['admin_utama', 'sub_admin_utama'] },
+    { label: 'Admin Bahagian', icon: <NotificationsIcon />, path: '/admin-bahagian', roles: ['admin_utama', 'sub_admin_utama', 'admin_bahagian'] },
+    { label: 'Pengurusan Pengguna', icon: <PeopleIcon />, path: '/user-management', roles: ['admin_utama'] },
+    { label: 'Log Keluar', icon: <LogoutIcon />, path: null, action: handleLogout, roles: ['admin_utama', 'sub_admin_utama', 'admin_bahagian', 'pengguna'] },
+  ];
 
       console.log('User role in MainLayout:', userRole);
   console.log('All menu items:', allMenu);
