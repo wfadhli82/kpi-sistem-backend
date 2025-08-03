@@ -211,15 +211,22 @@ const UserManagement = () => {
         console.log('🔍 ===== END UPDATING USER =====')
         
         console.log('🔍 ===== CALLING SUPABASE UPDATE =====')
-        const updateResult = await userService.updateUser(editingUser.id, {
-          name: updatedUser.name,
-          email: updatedUser.email,
-          role: updatedUser.role,
-          department_name: updatedUser.department,
-          ...(formData.password && { password: formData.password })
-        });
-        console.log('🔍 Supabase update result:', updateResult)
-        console.log('🔍 ===== END SUPABASE UPDATE =====')
+        console.log('🔍 userService available:', !!userService)
+        console.log('🔍 userService.updateUser available:', !!userService?.updateUser)
+        try {
+          const updateResult = await userService.updateUser(editingUser.id, {
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            department_name: updatedUser.department,
+            ...(formData.password && { password: formData.password })
+          });
+          console.log('🔍 Supabase update result:', updateResult)
+          console.log('🔍 ===== END SUPABASE UPDATE =====')
+        } catch (updateError) {
+          console.error('❌ Error in Supabase update:', updateError)
+          throw updateError
+        }
         
         // Verify the update by fetching the user again
         console.log('🔍 ===== VERIFYING UPDATE =====')
