@@ -345,6 +345,9 @@ export const userService = {
 
   // Get user by email
   async getUserByEmail(email) {
+    console.log('🔍 ===== GET USER BY EMAIL =====')
+    console.log('🔍 Email:', email)
+    
     if (!supabase) {
       console.warn('⚠️ Supabase not configured, using localStorage fallback')
       const users = JSON.parse(localStorage.getItem('users') || '[]')
@@ -352,13 +355,20 @@ export const userService = {
     }
     
     try {
+      console.log('🔍 Querying Supabase for user...')
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('email', email)
         .single()
       
-      if (error) throw error
+      if (error) {
+        console.error('❌ Supabase query error:', error)
+        throw error
+      }
+      
+      console.log('✅ User found in Supabase:', data)
+      console.log('🔍 ===== END GET USER BY EMAIL =====')
       return data
     } catch (error) {
       console.error('❌ Error getting user by email:', error)
@@ -426,7 +436,7 @@ export const userService = {
       
       console.log('✅ Supabase update successful:', data[0])
       console.log('🔍 ===== END UPDATE USER =====')
-      return data[0]
+      return data[0] || { id, ...updates }
     } catch (error) {
       console.error('❌ Error updating user:', error)
       throw error

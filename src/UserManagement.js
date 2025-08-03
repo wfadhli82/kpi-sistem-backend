@@ -221,6 +221,16 @@ const UserManagement = () => {
         console.log('🔍 Supabase update result:', updateResult)
         console.log('🔍 ===== END SUPABASE UPDATE =====')
         
+        // Verify the update by fetching the user again
+        console.log('🔍 ===== VERIFYING UPDATE =====')
+        try {
+          const verifiedUser = await userService.getUserByEmail(updatedUser.email)
+          console.log('🔍 Verified user data:', verifiedUser)
+          console.log('🔍 ===== END VERIFYING UPDATE =====')
+        } catch (error) {
+          console.error('❌ Error verifying update:', error)
+        }
+        
         // Update local state
         const updatedUsers = users.map(user =>
           user.id === editingUser.id ? updatedUser : user
