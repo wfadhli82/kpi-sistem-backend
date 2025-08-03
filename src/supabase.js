@@ -28,23 +28,33 @@ export const testSupabaseConnection = async () => {
     console.error('❌ Supabase not configured')
     return false
   }
-  
+
   try {
-    console.log('🔍 Testing Supabase connection...')
-    const { error } = await supabase
-      .from('users')
-      .select('count')
-      .limit(1)
+    console.log('🔍 ===== TESTING SUPABASE CONNECTION =====')
+    console.log('🔍 Attempting to query users table...')
     
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .limit(1)
+
     if (error) {
       console.error('❌ Supabase connection test failed:', error)
+      console.log('🔍 Error details:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
       return false
     }
-    
+
     console.log('✅ Supabase connection successful')
+    console.log('🔍 Users table accessible, found records:', data?.length || 0)
+    console.log('🔍 ===== END SUPABASE CONNECTION TEST =====')
     return true
   } catch (error) {
     console.error('❌ Supabase connection test error:', error)
+    console.log('🔍 ===== END SUPABASE CONNECTION TEST =====')
     return false
   }
 }
