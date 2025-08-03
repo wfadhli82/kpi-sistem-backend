@@ -6,7 +6,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useAuth } from './AuthContext';
 
 const departments = [
-  "BKP", "MCP", "BWP", "UI", "UUU", "BPA", "MCL", "UAD", "BPPH", "UKK", "BPSM", "BAZ", "BTM", "BPI - Dar Assaadah", "BPI - Darul Ilmi", "BPI - Darul Kifayah", "BPI - HQ", "BPI - IKB", "BPI - PMA", "BPI - SMA-MAIWP", "BPI - SMISTA"
+  "BAZ", "BKP", "BPA", "BPPH", "BPSM", "BPI - Dar Assaadah", "BPI - Darul Ilmi", "BPI - Darul Kifayah", "BPI - HQ", "BPI - IKB", "BPI - PMA", "BPI - SMA-MAIWP", "BPI - SMISTA", "BTM", "MCL", "MCP", "UAD", "UI", "UKK", "UUU", "BWP"
 ];
 
 const kategoriOptions = [
