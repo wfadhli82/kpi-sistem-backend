@@ -1,18 +1,18 @@
 {
   "files": {
     "main.css": "/kpi-sistem-backend/static/css/main.e6c13ad2.css",
-    "main.js": "/kpi-sistem-backend/static/js/main.17e5298b.js",
+    "main.js": "/kpi-sistem-backend/static/js/main.61a5a541.js",
     "static/js/453.face5969.chunk.js": "/kpi-sistem-backend/static/js/453.face5969.chunk.js",
     "static/media/menara-maiwp.jpg": "/kpi-sistem-backend/static/media/menara-maiwp.cf140f02278ba9898301.jpg",
     "static/media/logo-maiwp-new.png": "/kpi-sistem-backend/static/media/logo-maiwp-new.bc36200de62f9228f3f6.png",
     "static/media/logo-maiwp.png": "/kpi-sistem-backend/static/media/logo-maiwp.1d88121b8bf30c8036f0.png",
     "index.html": "/kpi-sistem-backend/index.html",
     "main.e6c13ad2.css.map": "/kpi-sistem-backend/static/css/main.e6c13ad2.css.map",
-    "main.17e5298b.js.map": "/kpi-sistem-backend/static/js/main.17e5298b.js.map",
+    "main.61a5a541.js.map": "/kpi-sistem-backend/static/js/main.61a5a541.js.map",
     "453.face5969.chunk.js.map": "/kpi-sistem-backend/static/js/453.face5969.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.17e5298b.js"
+    "static/js/main.61a5a541.js"
   ]
 }
