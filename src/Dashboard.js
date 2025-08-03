@@ -263,12 +263,12 @@ function Dashboard({ kpiList = [] }) {
               <Paper 
                 elevation={2} 
                 sx={{ 
-                  p: 3, 
+                  p: 3.5, 
                   borderRadius: 4,
                   background: '#ffffff',
                   border: '1px solid #f0f0f0',
                   transition: 'all 0.3s ease',
-                  height: '140px',
+                  height: '160px',
                   display: 'flex',
                   alignItems: 'center',
                   '&:hover': {
@@ -280,20 +280,21 @@ function Dashboard({ kpiList = [] }) {
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                   <Box sx={{ 
-                    width: 48, 
-                    height: 48, 
+                    width: 56, 
+                    height: 56, 
                     borderRadius: '50%', 
                     background: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    mr: 2,
+                    mr: 3,
                     border: `2px solid ${item.borderColor}`,
-                    flexShrink: 0
+                    flexShrink: 0,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                   }}>
                     <Box sx={{ 
                       color: item.iconColor,
-                      fontSize: 20
+                      fontSize: 24
                     }}>
                       {item.icon}
                     </Box>
@@ -304,30 +305,33 @@ function Dashboard({ kpiList = [] }) {
                       sx={{ 
                         fontWeight: 800, 
                         color: '#111827', 
-                        mb: 0.5,
-                        fontSize: '1.75rem',
-                        lineHeight: 1.2,
-                        height: '2.1rem',
+                        mb: 1.5,
+                        fontSize: '2.25rem',
+                        lineHeight: 1.1,
+                        height: 'auto',
                         display: 'flex',
-                        alignItems: 'center',
+                        alignItems: 'flex-start',
                         justifyContent: 'flex-start',
-                        width: '100%'
+                        width: '100%',
+                        fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif'
                       }}
                     >
                       {item.value}
                     </Typography>
                     <Typography 
                       sx={{ 
-                        fontSize: 12, 
-                        fontWeight: 500,
-                        color: '#6b7280',
+                        fontSize: 13, 
+                        fontWeight: 600,
+                        color: '#4b5563',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        height: '1rem',
+                        letterSpacing: '0.8px',
+                        height: 'auto',
                         display: 'flex',
-                        alignItems: 'center',
+                        alignItems: 'flex-start',
                         justifyContent: 'flex-start',
-                        width: '100%'
+                        width: '100%',
+                        fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+                        lineHeight: 1.4
                       }}
                     >
                       {item.label}
