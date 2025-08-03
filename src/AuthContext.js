@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }) => {
   const initializeDefaultUsers = async () => {
     try {
       const users = await userService.getAllUsers();
+      console.log('🔍 Current users in system:', users.length);
       
       if (users.length === 0) {
         const defaultUsers = [
@@ -57,9 +58,29 @@ export const AuthProvider = ({ children }) => {
             console.log('✅ Password added to existing admin user:', adminUser);
           }
         }
+        
+        // Log all users for debugging
+        const allUsers = await userService.getAllUsers();
+        console.log('🔍 All users after initialization:', allUsers);
       }
     } catch (error) {
       console.error('❌ Error initializing default users:', error);
+      // Fallback to localStorage if Supabase fails
+      const savedUsers = localStorage.getItem('users');
+      if (!savedUsers) {
+        const defaultUsers = [
+          {
+            id: Date.now().toString(),
+            name: 'Admin Utama',
+            email: 'wfadhli82@gmail.com',
+            password: 'admin123',
+            role: 'admin',
+            department: 'Pentadbiran'
+          }
+        ];
+        localStorage.setItem('users', JSON.stringify(defaultUsers));
+        console.log('✅ Default users initialized in localStorage:', defaultUsers);
+      }
     }
   };
 
@@ -67,7 +88,10 @@ export const AuthProvider = ({ children }) => {
   const getUserInfo = async (email) => {
     try {
       const user = await userService.getUserByEmail(email);
+      console.log('🔍 User found by email:', user);
+      
       if (!user) {
+        console.log('⚠️ User not found, returning default role');
         return { role: 'user', department: null };
       }
       
@@ -76,12 +100,25 @@ export const AuthProvider = ({ children }) => {
       const priorityOrder = { 'admin': 3, 'admin_bahagian': 2, 'user': 1 };
       const highestPriorityUser = user;
       
-      return { 
+      const userInfo = { 
         role: highestPriorityUser.role, 
         department: highestPriorityUser.department_name 
       };
+      
+      console.log('🔍 User info resolved:', userInfo);
+      return userInfo;
     } catch (error) {
       console.error('❌ Error getting user info from Supabase:', error);
+      // Fallback to localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const localUser = users.find(u => u.email === email);
+      if (localUser) {
+        console.log('🔍 User found in localStorage:', localUser);
+        return { 
+          role: localUser.role, 
+          department: localUser.department 
+        };
+      }
       return { role: 'user', department: null };
     }
   };
@@ -114,8 +151,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       getUserInfo(user.email).then(userInfo => {
+        console.log('🔍 User info loaded:', userInfo);
         setUserRole(userInfo.role);
         setUserDepartment(userInfo.department);
+      }).catch(error => {
+        console.error('❌ Error loading user info:', error);
+        // Fallback to user data from localStorage
+        setUserRole(user.role || 'user');
+        setUserDepartment(user.department || null);
       });
     } else {
       setUserRole(null);
