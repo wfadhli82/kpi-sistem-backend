@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { userService } from './supabase';
+import { userService, testSupabaseConnection } from './supabase';
 
 const AuthContext = createContext({});
 
@@ -124,7 +124,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    initializeDefaultUsers();
+    // Test Supabase connection first
+    testSupabaseConnection().then(isConnected => {
+      console.log('🔍 Supabase connection status:', isConnected);
+      
+      if (isConnected) {
+        initializeDefaultUsers();
+      } else {
+        console.warn('⚠️ Supabase not connected, using localStorage only');
+      }
+    });
     
     // Check if user session exists in localStorage
     const savedUser = localStorage.getItem('currentUser');

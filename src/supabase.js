@@ -3,14 +3,50 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
 
+// Debug Supabase configuration
+console.log('🔍 Supabase Configuration Check:')
+console.log('🔍 REACT_APP_SUPABASE_URL:', supabaseUrl ? 'Set' : 'Not Set')
+console.log('🔍 REACT_APP_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Set' : 'Not Set')
+
 // Check if Supabase credentials are properly configured
 const hasSupabaseCredentials = supabaseUrl && supabaseAnonKey && 
   supabaseUrl !== 'your_supabase_project_url_here' && 
   supabaseAnonKey !== 'your_supabase_anon_key_here'
 
+console.log('🔍 Has Supabase Credentials:', hasSupabaseCredentials)
+
 export const supabase = hasSupabaseCredentials 
   ? createClient(supabaseUrl, supabaseAnonKey)
   : null
+
+console.log('🔍 Supabase Client Created:', !!supabase)
+
+// Test Supabase connection
+export const testSupabaseConnection = async () => {
+  if (!supabase) {
+    console.error('❌ Supabase not configured')
+    return false
+  }
+  
+  try {
+    console.log('🔍 Testing Supabase connection...')
+    const { data, error } = await supabase
+      .from('users')
+      .select('count')
+      .limit(1)
+    
+    if (error) {
+      console.error('❌ Supabase connection test failed:', error)
+      return false
+    }
+    
+    console.log('✅ Supabase connection successful')
+    return true
+  } catch (error) {
+    console.error('❌ Supabase connection test error:', error)
+    return false
+  }
+}
 
 // Helper functions for KPI system
 export const kpiService = {
