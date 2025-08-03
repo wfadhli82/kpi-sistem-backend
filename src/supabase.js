@@ -30,7 +30,7 @@ export const testSupabaseConnection = async () => {
   
   try {
     console.log('🔍 Testing Supabase connection...')
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('users')
       .select('count')
       .limit(1)
