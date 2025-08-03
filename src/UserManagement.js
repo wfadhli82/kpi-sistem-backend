@@ -199,13 +199,16 @@ const UserManagement = () => {
       
       // Update in Supabase
       try {
-        console.log('🔍 Updating user with data:', {
+        console.log('🔍 ===== UPDATING USER =====')
+        console.log('🔍 User ID:', editingUser.id)
+        console.log('🔍 User data:', {
           name: updatedUser.name,
           email: updatedUser.email,
           role: updatedUser.role,
           department_name: updatedUser.department,
           ...(formData.password && { password: formData.password })
         });
+        console.log('🔍 ===== END UPDATING USER =====')
         
         await userService.updateUser(editingUser.id, {
           name: updatedUser.name,

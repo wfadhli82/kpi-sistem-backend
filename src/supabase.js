@@ -4,7 +4,7 @@ const supabaseUrl = process.env.REACT_APP_SUPABASE_URL
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY
 
 // Debug Supabase configuration
-console.log('🔍 Supabase Configuration Check:')
+console.log('🔍 ===== SUPABASE CONFIGURATION CHECK =====')
 console.log('🔍 REACT_APP_SUPABASE_URL:', supabaseUrl ? 'Set' : 'Not Set')
 console.log('🔍 REACT_APP_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Set' : 'Not Set')
 
@@ -20,6 +20,7 @@ export const supabase = hasSupabaseCredentials
   : null
 
 console.log('🔍 Supabase Client Created:', !!supabase)
+console.log('🔍 ===== END SUPABASE CONFIGURATION CHECK =====')
 
 // Test Supabase connection
 export const testSupabaseConnection = async () => {
