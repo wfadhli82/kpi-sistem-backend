@@ -56,14 +56,22 @@ const UserManagement = () => {
   const loadUsersFromSupabase = async () => {
     try {
       const users = await userService.getAllUsers();
-      setUsers(users);
-      console.log('✅ Loaded users from Supabase:', users.length);
+      // Transform data to ensure consistency
+      const transformedUsers = users.map(user => ({
+        ...user,
+        department: user.department || user.department_name || ''
+      }));
+      setUsers(transformedUsers);
+      console.log('✅ Loaded users from Supabase:', transformedUsers.length);
+      console.log('🔍 Users data:', transformedUsers);
     } catch (error) {
       console.error('❌ Error loading users from Supabase:', error);
       // Fallback to localStorage if Supabase fails
       const savedUsers = localStorage.getItem('users');
       if (savedUsers) {
-        setUsers(JSON.parse(savedUsers));
+        const localUsers = JSON.parse(savedUsers);
+        setUsers(localUsers);
+        console.log('✅ Loaded users from localStorage:', localUsers.length);
       }
     }
   };
@@ -83,7 +91,7 @@ const UserManagement = () => {
           email: user.email,
           password: user.password,
           role: user.role,
-          department_name: user.department
+          department_name: user.department || user.department_name
         });
       }
       
@@ -191,6 +199,14 @@ const UserManagement = () => {
       
       // Update in Supabase
       try {
+        console.log('🔍 Updating user with data:', {
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          department_name: updatedUser.department,
+          ...(formData.password && { password: formData.password })
+        });
+        
         await userService.updateUser(editingUser.id, {
           name: updatedUser.name,
           email: updatedUser.email,
@@ -204,6 +220,9 @@ const UserManagement = () => {
           user.id === editingUser.id ? updatedUser : user
         );
         setUsers(updatedUsers);
+        
+        // Also update localStorage
+        localStorage.setItem('users', JSON.stringify(updatedUsers));
         
         setAlert({
           show: true,

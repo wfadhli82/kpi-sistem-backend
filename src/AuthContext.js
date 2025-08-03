@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
       
       const userInfo = { 
         role: highestPriorityUser.role, 
-        department: highestPriorityUser.department_name 
+        department: highestPriorityUser.department_name || highestPriorityUser.department
       };
       
       console.log('🔍 User info resolved:', userInfo);
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }) => {
         console.log('🔍 User found in localStorage:', localUser);
         return { 
           role: localUser.role, 
-          department: localUser.department 
+          department: localUser.department || localUser.department_name
         };
       }
       return { role: 'user', department: null };
