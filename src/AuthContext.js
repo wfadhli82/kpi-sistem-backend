@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { userService, testSupabaseConnection } from './supabase';
+import { ensureDemoUsers } from './demoData';
 
 const AuthContext = createContext({});
 
@@ -124,6 +125,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    ensureDemoUsers();
+
     // Test Supabase connection first
     testSupabaseConnection().then(isConnected => {
       console.log('🔍 Supabase connection status:', isConnected);

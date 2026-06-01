@@ -9,6 +9,7 @@ import UserInterface from "./UserInterface";
 import UserManagement from "./UserManagement";
 import MainLayout from "./MainLayout";
 import { kpiService } from "./supabase";
+import { seedDemoKPIsIfEmpty } from "./demoData";
 import * as XLSX from "xlsx";
 
 const ProtectedRoute = ({ children }) => {
@@ -33,7 +34,7 @@ export default function App() {
         const data = await kpiService.getAllKPIs();
         console.log('🔍 Data received from Supabase:', data);
         console.log('🔍 Data length:', data?.length || 0);
-        setKpiList(data);
+        setKpiList(data && data.length > 0 ? data : seedDemoKPIsIfEmpty());
       } catch (error) {
         console.error('❌ Error loading KPI data:', error);
         // Fallback to localStorage if Supabase fails
@@ -41,6 +42,8 @@ export default function App() {
         if (saved) {
           console.log('🔄 Falling back to localStorage data');
           setKpiList(JSON.parse(saved));
+        } else {
+          setKpiList(seedDemoKPIsIfEmpty());
         }
       } finally {
         setLoading(false);
